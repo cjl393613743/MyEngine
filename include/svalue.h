@@ -11,11 +11,13 @@ const unsigned int TYPE_SVALUE_TIMER = 4;
 class Timer
 {
     public:
-        unsigned long int timeout;
         TimerCallBackPoiner pCallBack;
         void *pArgs;
+        unsigned int period;
+        unsigned int timeout;
+        unsigned int evalTimes;
 
-        Timer(TimerCallBackPoiner pCallBack, void *pArgs);
+        Timer();
         void Eval();
 };
 

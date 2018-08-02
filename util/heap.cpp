@@ -13,7 +13,7 @@ HeapElem::HeapElem(unsigned short int index, SuperValueBase *pData) : index(inde
 
 HeapElem::~HeapElem()
 {
-    cout<<"析构堆元素"<<endl;
+    //cout<<"析构堆元素"<<endl;
 }
 
 void HeapElem::PrintHeapElem()
@@ -58,7 +58,7 @@ MinHeap::MinHeap(SuperValueBase **pSuperValueList, unsigned short int n)
 
 MinHeap::~MinHeap()
 {
-    cout<<"析构小根堆"<<endl;
+    //cout<<"析构小根堆"<<endl;
     
     for(int i = 0; i < this->iSize; ++i)
     {
@@ -202,6 +202,7 @@ bool MinHeap::RemoveHeapElem(SuperValueBase *pData)
 //获取堆顶元素
 SuperValueBase* MinHeap::GetTopHeapElem()
 {
+    if(this->iSize == 0) return NULL;
     return this->pElemPointerList[0]->pData;
 }
 

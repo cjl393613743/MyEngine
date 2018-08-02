@@ -4,7 +4,7 @@
 using namespace std;
 
 /************************Timer********************************/
-Timer::Timer(TimerCallBackPoiner pCallBack, void *pArgs) : pCallBack(pCallBack), pArgs(pArgs){}
+Timer::Timer() : pCallBack(NULL), pArgs(NULL), period(0), timeout(0), evalTimes(1) {}
 
 void Timer::Eval()
 {
