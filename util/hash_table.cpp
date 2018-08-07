@@ -105,6 +105,8 @@ SuperValueBase* HashTable::RemoveHashTableElem(int iKey)
                 pLastHashElem->pNext = pTmpHashElem->pNext;
             }
 
+            this->iCurSize -= 1;
+
             delete pTmpHashElem;
 
             return pBase;

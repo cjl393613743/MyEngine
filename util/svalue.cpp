@@ -5,7 +5,7 @@
 using namespace std;
 
 /************************Timer********************************/
-Timer::Timer() : pCallBack(NULL), pArgs(NULL), period(0), timeout(0), evalTimes(1) {}
+Timer::Timer() : pCallBack(NULL), pArgs(NULL), iPeriod(0), iTimeOut(0), iEvalTimes(1) {}
 
 void Timer::Eval()
 {
@@ -44,17 +44,17 @@ SuperValueTimer::SuperValueTimer(Timer *pTimer)
 
 void SuperValueTimer::PrintSuperValue()
 {
-    cout<<this->u.pTimer->timeout;
+    cout<<this->u.pTimer->iTimeOut;
 }
 
 bool SuperValueTimer::operator>(const SuperValueBase &base)
 {
-    return this->u.pTimer->timeout > base.u.pTimer->timeout;
+    return this->u.pTimer->iTimeOut > base.u.pTimer->iTimeOut;
 }
 
 bool SuperValueTimer::operator<(const SuperValueBase &base)
 {
-    return this->u.pTimer->timeout < base.u.pTimer->timeout;
+    return this->u.pTimer->iTimeOut < base.u.pTimer->iTimeOut;
 }
 
 

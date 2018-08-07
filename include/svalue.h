@@ -14,9 +14,10 @@ class Timer
     public:
         TimerCallBackPoiner pCallBack;
         void *pArgs;
-        unsigned int period;
-        unsigned int timeout;
-        unsigned int evalTimes;
+        unsigned int iPeriod;
+        unsigned int iTimeOut;
+        unsigned int iEvalTimes;
+        unsigned int iHashTableIndex; 
 
         Timer();
         void Eval();

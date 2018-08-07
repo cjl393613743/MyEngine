@@ -3,28 +3,73 @@
 #include <iostream>
 #include <ctime>
 #include "heart_beat.h"
+#include "hash_table.h"
 #include "heap.h"
 
 using namespace std;
 
 static unsigned int times = 0;
-static unsigned int short iHeartBeatType = 0;
-static MinHeap *pMinHeap = NULL;
 
-bool CallOut(unsigned int delay, unsigned int period, unsigned int times, TimerCallBackPoiner pCallBack, void *pArgs)
+static unsigned int gIndex = 0;
+static unsigned int short gHeartBeatType = 0;
+static MinHeap *gMinHeap = NULL;
+static HashTable *gHashTable = NULL;
+
+inline static bool CheckInitHeartBeat()
 {
-    if(pMinHeap == NULL || iHeartBeatType == 0) return false;
+    if(gMinHeap == NULL || gHashTable == NULL || gHeartBeatType == 0) return 0;
+    return 1;
+}
+
+inline static unsigned int GenHeartBeatIndex()
+{
+    if(gIndex == 0XFFFF) gIndex = 0;
+    ++gIndex;
+}
+
+unsigned int CallOut(unsigned int iDelay, unsigned int iPeriod, unsigned int iTimes, TimerCallBackPoiner pCallBack, void *pArgs)
+{
+    if(!CheckInitHeartBeat()) return 0;
+
+    unsigned int iIndex = GenHeartBeatIndex();
 
     Timer *pTimer = new Timer();
     pTimer->pCallBack = pCallBack;
     pTimer->pArgs = pArgs;
-    pTimer->period = period;
-    pTimer->timeout = time(0) + delay;
-    pTimer->evalTimes = times;
+    pTimer->iPeriod = iPeriod;
+    pTimer->iTimeOut = time(0) + iDelay;
+    pTimer->iEvalTimes = iTimes;
+    pTimer->iHashTableIndex = iIndex;
 
     SuperValueTimer *pSuperValueTimer = new SuperValueTimer(pTimer);
 
-    return pMinHeap->InsertHeapElem(pSuperValueTimer);
+    if(NULL == gHashTable->InsertHashTableElem(iIndex, pSuperValueTimer))
+    {
+        delete pSuperValueTimer;
+        return 0;
+    }
+
+    bool insertFlag = gMinHeap->InsertHeapElem(pSuperValueTimer);
+    if(!insertFlag)
+    {
+        gHashTable->RemoveHashTableElem(iIndex);
+        delete pSuperValueTimer;
+        return 0;
+    }
+
+    return iIndex;
+}
+
+bool RemoveCallOut(unsigned int iIndex)
+{
+    SuperValueTimer *pSuperValueTimer = (SuperValueTimer*)gHashTable->operator[](iIndex);
+    if(pSuperValueTimer == NULL) return false;
+
+    Timer *pTimer = pSuperValueTimer->u.pTimer;
+    gMinHeap->RemoveHeapElem(pSuperValueTimer);
+    gHashTable->RemoveHashTableElem(iIndex);
+    delete pTimer;
+    delete pSuperValueTimer;
 }
 
 static void EvalTimeOutTimer()
@@ -32,23 +77,26 @@ static void EvalTimeOutTimer()
     unsigned int now = time(0);
     while(1)
     {
-        SuperValueTimer *pSuperValueTimer = (SuperValueTimer*)pMinHeap->GetTopHeapElem();
+        SuperValueTimer *pSuperValueTimer = (SuperValueTimer*)gMinHeap->GetTopHeapElem();
         if(pSuperValueTimer == NULL) break;
         Timer *pTimer = pSuperValueTimer->u.pTimer;
-        unsigned int timeout = pTimer->timeout;
-        if(timeout > now) break;
+        unsigned int iTimeOut = pTimer->iTimeOut;
+        if(iTimeOut > now) break;
 
-        pMinHeap->RemoveHeapElem(pSuperValueTimer);
+        gMinHeap->RemoveHeapElem(pSuperValueTimer);
         pTimer->Eval();
-        if(pTimer->evalTimes > 0) pTimer->evalTimes -= 1;
-        if(pTimer->evalTimes == 0)
+        if(pTimer->iEvalTimes > 0) pTimer->iEvalTimes -= 1;
+        if(pTimer->iEvalTimes == 0)
         {
+            unsigned int iHashTableIndex = pTimer->iHashTableIndex;
+            gHashTable->RemoveHashTableElem(iHashTableIndex);
+
             delete pTimer;
             delete pSuperValueTimer;
         }else
         {
-            pTimer->timeout = now + pTimer->period;
-            pMinHeap->InsertHeapElem(pSuperValueTimer);
+            pTimer->iTimeOut = now + pTimer->iPeriod;
+            gMinHeap->InsertHeapElem(pSuperValueTimer);
         }
     }
 }
@@ -74,13 +122,14 @@ static void SignalLoop()
 
 bool InitHeartBeat(unsigned short int type = TYPE_HEART_BEAT_SIGNAL)
 {
-    if(pMinHeap != NULL || iHeartBeatType != 0) return false;
+    if(CheckInitHeartBeat()) return false;
 
-    pMinHeap = new MinHeap();
+    gMinHeap = new MinHeap();
+    gHashTable = new HashTable(INIT_HAERT_BEAT_HASH_TABLE_SIZE);
     switch(type)
     {
         case TYPE_HEART_BEAT_SIGNAL:
-            iHeartBeatType = TYPE_HEART_BEAT_SIGNAL;
+            gHeartBeatType = TYPE_HEART_BEAT_SIGNAL;
             break;
         default:
             return false;
@@ -91,9 +140,9 @@ bool InitHeartBeat(unsigned short int type = TYPE_HEART_BEAT_SIGNAL)
 
 bool StartHeartBeat()
 {
-    if(pMinHeap == NULL || iHeartBeatType == 0) return false;
+    if(!CheckInitHeartBeat()) return false;
 
-    switch(iHeartBeatType)
+    switch(gHeartBeatType)
     {
         case TYPE_HEART_BEAT_SIGNAL:
             SignalLoop();
