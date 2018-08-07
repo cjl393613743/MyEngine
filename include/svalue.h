@@ -7,6 +7,7 @@ const unsigned int TYPE_SVALUE_STRING = 1;
 const unsigned int TYPE_SVALUE_INT = 2;
 const unsigned int TYPE_SVALUE_DOUBLE = 3;
 const unsigned int TYPE_SVALUE_TIMER = 4;
+const unsigned int TYPE_SVALUE_HASH_TABLE = 5;
 
 class Timer
 {
@@ -21,6 +22,8 @@ class Timer
         void Eval();
 };
 
+class HashTable;
+
 union U
 {
     char *str;
@@ -28,6 +31,7 @@ union U
     double real;
 
     Timer *pTimer;
+    HashTable *pHashTable;
 };
 
 class SuperValueBase
@@ -74,4 +78,19 @@ class SuperValueTimer : public SuperValueBase
         //virtual bool operator!=(const SuperValueBase &base);
 };
 
+class SuperValueHashTable : public SuperValueBase
+{
+    public:
+        SuperValueHashTable(HashTable *pHashTable);
+
+        virtual void PrintSuperValue();
+        virtual bool operator>(const SuperValueBase &base);
+        //virtual bool operator>=(const SuperValueBase &base);
+        virtual bool operator<(const SuperValueBase &base);
+        //virtual bool operator<=(const SuperValueBase &base);
+        //virtual bool operator==(const SuperValueBase &base);
+        //virtual bool operator!=(const SuperValueBase &base);
+};
+
 #endif
+

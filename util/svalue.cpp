@@ -1,5 +1,6 @@
 #include <iostream>
 #include "svalue.h"
+#include "hash_table.h"
 
 using namespace std;
 
@@ -54,4 +55,27 @@ bool SuperValueTimer::operator>(const SuperValueBase &base)
 bool SuperValueTimer::operator<(const SuperValueBase &base)
 {
     return this->u.pTimer->timeout < base.u.pTimer->timeout;
+}
+
+
+/************************SuperValueHashTable*********************/
+SuperValueHashTable::SuperValueHashTable(HashTable *pHashTable)
+{
+    this->type = TYPE_SVALUE_HASH_TABLE;
+    this->u.pHashTable = pHashTable;
+}
+
+void SuperValueHashTable::PrintSuperValue()
+{
+    this->u.pHashTable->PrintHashTable();
+}
+
+bool SuperValueHashTable::operator>(const SuperValueBase &base)
+{
+    return this->u.pHashTable->GetSize() > base.u.pHashTable->GetSize();
+}
+
+bool SuperValueHashTable::operator<(const SuperValueBase &base)
+{
+    return this->u.pHashTable->GetSize() < base.u.pHashTable->GetSize();
 }
