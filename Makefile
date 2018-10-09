@@ -54,7 +54,7 @@ mytest: $(TEST_DIR)/mytest.cpp
 	$(CC) $(TEST_DIR)/mytest.cpp -o mytest
 
 clean_test:
-	-rm -r mytest
+	-rm -r $(TEST_DIR)/mytest.o mytest
 
 cleanall: clean_test clean_test_heap clean_test_heart_beat clean_test_hash_table
 	echo "cleanall"
